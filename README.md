@@ -1,2 +1,2 @@
 # HeartbeatArchitectures
-For the Distributed System lecture; centralized, ring adn all to all.
+For the Distributed System lecture; centralized, ring and all to all.
