@@ -1,0 +1,11 @@
+[Unit]
+Description=Client
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/my_client.py /usr/local/bin/servers.txt
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
