@@ -1,6 +1,8 @@
 import socket
 import time
 import logging
+import sys
+
 
 class MyServer:
     """
@@ -21,10 +23,10 @@ class MyServer:
         self.heartbeats = {}  # dict where key:address, value:heartbeats
         self.timestamps = {}  # dict where key:address, value:timestamp
 
-        logging.basicConfig(filename='/usr/local/bin/server.log', filemode='w', format='%(levelname)s - %(asctime)s - %(message)s',
-                            level=logging.INFO)
+        logging.basicConfig(stream=sys.stdout, format='%(levelname)s - %(asctime)s - %(message)s',
+                            level=logging.INFO)  #logging.INFO is futile, still won't appear on journalctl (warn or >)
 
-        logging.debug("Init successful!")
+        logging.warning("Init successful!")
 
     def start(self):
         """
@@ -51,9 +53,9 @@ class MyServer:
 
         if address not in self.timestamps:
             self.timestamps[address] = time.time()
-            logging.debug(f"First connection of {address}")
+            logging.warning(f"First connection of {address}")
 
-        logging.info(f"Currently connected: {self.timestamps.keys()}")
+        logging.warning(f"Currently connected: {self.timestamps.keys()}")
 
         while 1:
             message = self.read_buffer(connection=clientsocket)
@@ -64,10 +66,9 @@ class MyServer:
             heartbeat = message.decode("utf-8")
             self.check_reconnected(heartbeat=heartbeat, address=address)
             self.heartbeats[address] = heartbeat
-            logging.info(f"Heartbeat --> {heartbeat} RECEIVED from address --> {address}")
+            logging.warning(f"Heartbeat --> {heartbeat} RECEIVED from address --> {address}")
 
         clientsocket.close()
-
 
     def read_buffer(self, connection):
         """
@@ -109,7 +110,7 @@ class MyServer:
             treshold = 0 #TODO: adjust it when tested
 
             if time_diff > (int(heartbeats) + treshold):
-                logging.info(f"CLIENT {address} DISCONNECTED! time: {time_diff} ; heartbeats: {heartbeats}")
+                logging.critical(f"CLIENT {address} DISCONNECTED! time: {time_diff} ; heartbeats: {heartbeats}")
 
 
 if __name__ == "__main__":

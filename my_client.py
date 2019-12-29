@@ -4,7 +4,6 @@ import time
 import threading
 import logging
 
-
 class MyClient:
     TCP_PORT = 9870
     BUFFER_SIZE = 1024
@@ -17,14 +16,12 @@ class MyClient:
 
         file = open(sys.argv[1], 'r')
         self.server_list = [line.strip() for line in file.readlines()]
-        #print(self.server_list)
 
         for server in self.server_list:
             self.heartbeat_counter[server] = 0
 
-        logging.basicConfig(filename='/usr/local/bin/client.log', filemode='w', format='%(levelname)s - %(asctime)s - %(message)s',
-                            level=logging.INFO)
-        logging.debug(f"Reading server.txt succeded! Content: {self.server_list}")
+        logging.basicConfig(stream=sys.stdout, format='%(levelname)s - %(asctime)s - %(message)s')
+        logging.warning(f"Reading server.txt succeded! Content: {self.server_list}")
 
     def start(self):
         self.connect()
@@ -42,7 +39,7 @@ class MyClient:
         t.start()
 
         for server in self.server_list:
-            logging.info(f"Connecting to {server}")
+            logging.warning(f"Connecting to {server}")
 
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,10 +47,10 @@ class MyClient:
                 s.send(bytes(str(self.heartbeat_counter[server]), "utf-8"))
                 s.close()
                 self.heartbeat_counter[server] += 1
-                logging.debug(f"Heartbeat {self.heartbeat_counter[server]} SENT")
+                logging.warning(f"Heartbeat {self.heartbeat_counter[server]} SENT")
             except ConnectionRefusedError:
                 self.heartbeat_counter[server] = 0
-                logging.exception("Exception occured!")
+                logging.warning("Exception occured!")
 
 
 if __name__=="__main__":
