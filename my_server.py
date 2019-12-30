@@ -55,7 +55,7 @@ class MyServer:
             self.timestamps[address] = time.time()
             logging.warning(f"First connection of {address}")
 
-        logging.warning(f"Currently connected: {self.timestamps.keys()}")
+        logging.warning(f"Dict keys: {self.timestamps.keys()}")
 
         while 1:
             message = self.read_buffer(connection=clientsocket)
@@ -80,8 +80,8 @@ class MyServer:
 
         try:
             data = connection.recv(self.BUFFER_SIZE)
-        except Exception as e: #socket.timeout:
-            logging.exception("Exception occurred!")
+        except socket.timeout:
+            logging.exception("Exception occurred: SOCKET TIMEOUT")
 
         return data
 
@@ -96,8 +96,8 @@ class MyServer:
             if self.heartbeats[address] > heartbeat:
                 self.timestamps[address] = time.time()
                 logging.debug(f"Reconnected {address}")
-        except Exception as e: #KeyError
-            logging.exception("Exception occured!")
+        except KeyError:
+            logging.exception("Exception occured: KEY ERROR!")
 
     def check_alive(self):
         """
@@ -107,7 +107,7 @@ class MyServer:
 
         for address, heartbeats in self.heartbeats.items():
             time_diff = time. time() - self.timestamps[address]
-            treshold = 0 #TODO: adjust it when tested
+            treshold = 1
 
             if time_diff > (int(heartbeats) + treshold):
                 logging.critical(f"CLIENT {address} DISCONNECTED! time: {time_diff} ; heartbeats: {heartbeats}")
