@@ -19,7 +19,7 @@ class MyServer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #ipv4, TCP socket
         self.socket.bind(('', self.TCP_PORT)) #the socket is reachable by any address the machine happens to have
         self.socket.listen(5)
-        # self.socket.settimeout(0.1)
+        self.socket.settimeout(0.1)
         self.heartbeats = {}  # dict where key:address, value:heartbeats
         self.timestamps = {}  # dict where key:address, value:timestamp
 
@@ -47,7 +47,7 @@ class MyServer:
         :return: None
         """
         clientsocket, addressport = self.socket.accept()
-        logging.debug(f"Connection from {addressport[0]} has been established")
+        logging.warning(f"Connection from {addressport[0]} has been established")
         clientsocket.settimeout(self.TIMEOUT)
         address = addressport[0]
 
@@ -95,7 +95,8 @@ class MyServer:
         try:
             if self.heartbeats[address] > heartbeat:
                 self.timestamps[address] = time.time()
-                logging.debug(f"Reconnected {address}")
+                self.heartbeats[address] = heartbeat
+                logging.critical(f"RECONNECTED {address}")
         except KeyError:
             logging.exception("Exception occured: KEY ERROR!")
 
