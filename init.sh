@@ -2,8 +2,8 @@
 
 VMS=2
 
-CENTRALISED=1
-RING=0
+CENTRALISED=0
+RING=1
 ALL_TO_ALL=0
 
 gcloud config set compute/zone us-central1-a
@@ -38,16 +38,25 @@ for i in $(seq 0 $VMS)
 
     elif [ $RING -eq "1" ]; then
       client=$i
-      server=$((($i+1)%VMS))
+      server=$(($(($i+1))%$(($VMS+1))))
 
       gcloud compute ssh instance-$i -- sudo systemctl daemon-reload # reload system files in systemd
       gcloud compute ssh instance-$server -- sudo systemctl restart my_server.service
-      gcloud compute ssh instance-$client -- sed -n "$($server + 1)"p /tmp/DS1/server_list.txt > /etc/systemd/system/servers.txt
+
+      gcloud compute ssh instance-$client -- sed -n "$(($server+1))"p /tmp/DS1/server_list.txt > servers.txt
+      gcloud compute scp servers.txt instance-$i:/tmp/DS1/
+      gcloud compute ssh instance-$i -- sudo mv /tmp/DS1/servers.txt /usr/local/bin/
+      rm servers.txt
+
       gcloud compute ssh instance-$client -- sudo systemctl restart my_client.service
 
     elif [ $ALL_TO_ALL -eq "1" ]; then
-      gcloud compute ssh instance-$i -- cat /tmp/DS1/server_list.txt > /etc/systemd/system/servers.txt #each instances sends to everyone
       gcloud compute ssh instance-$i -- sudo systemctl daemon-reload # reload system files in systemd
+      gcloud compute ssh instance-$i -- sed -n "$(($i+1))d;p" /tmp/DS1/server_list.txt > servers.txt #each instances sends to everyone
+      gcloud compute scp servers.txt instance-$i:/tmp/DS1/
+      gcloud compute ssh instance-$i -- sudo mv /tmp/DS1/servers.txt /usr/local/bin/
+      rm servers.txt
+
       gcloud compute ssh instance-$i -- sudo systemctl restart my_server.service
       gcloud compute ssh instance-$i -- sudo systemctl restart my_client.service
 
