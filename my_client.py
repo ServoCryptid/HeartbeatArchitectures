@@ -13,7 +13,6 @@ class MyClient:
         Constructor of the class.
         """
         self.heartbeat_counter = {}  # remember the heartbeat counter for each server in the server list separately
-
         file = open(sys.argv[1], 'r')
         self.server_list = [line.strip() for line in file.readlines()]
 
@@ -55,4 +54,4 @@ class MyClient:
 
 if __name__=="__main__":
     c = MyClient()
-   # c.start()
+    c.start()
