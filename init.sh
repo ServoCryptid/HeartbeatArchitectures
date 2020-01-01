@@ -3,8 +3,8 @@
 VMS=2
 
 CENTRALISED=0
-RING=1
-ALL_TO_ALL=0
+RING=0
+ALL=1
 
 gcloud config set compute/zone us-central1-a
 
@@ -50,9 +50,11 @@ for i in $(seq 0 $VMS)
 
       gcloud compute ssh instance-$client -- sudo systemctl restart my_client.service
 
-    elif [ $ALL_TO_ALL -eq "1" ]; then
+    elif [ $ALL -eq "1" ]; then
+      inst=$i
       gcloud compute ssh instance-$i -- sudo systemctl daemon-reload # reload system files in systemd
-      gcloud compute ssh instance-$i -- sed -n "$(($i+1))d;p" /tmp/DS1/server_list.txt > servers.txt #each instances sends to everyone
+      sed -n "$(($inst+1))d;p" server_list.txt > servers.txt #each instances sends to everyone
+      echo "all"
       gcloud compute scp servers.txt instance-$i:/tmp/DS1/
       gcloud compute ssh instance-$i -- sudo mv /tmp/DS1/servers.txt /usr/local/bin/
       rm servers.txt
