@@ -53,9 +53,9 @@ class MyServer:
 
         if address not in self.timestamps:
             self.timestamps[address] = time.time()
-            logging.warning(f"First connection of {address}")
+            #logging.warning(f"First connection of {address}")
 
-        logging.warning(f"Dict keys: {self.timestamps.keys()}")
+        #logging.warning(f"Dict keys: {self.timestamps.keys()}")
 
         while 1:
             message = self.read_buffer(connection=clientsocket)
@@ -107,11 +107,14 @@ class MyServer:
         """
 
         for address, heartbeats in self.heartbeats.items():
-            time_diff = time. time() - self.timestamps[address]
-            treshold = 1
+            if address == "127.0.0.1":
+                continue
+            else:
+                time_diff = time.time() - self.timestamps[address]
+                treshold = 1
 
-            if time_diff > (int(heartbeats) + treshold):
-                logging.critical(f"CLIENT {address} DISCONNECTED! time: {time_diff} ; heartbeats: {heartbeats}")
+                if time_diff > (int(heartbeats) + treshold):
+                    logging.critical(f"CLIENT {address} DISCONNECTED! time: {time_diff} ; heartbeats: {heartbeats}")
 
 
 if __name__ == "__main__":
